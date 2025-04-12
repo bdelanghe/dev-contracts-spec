@@ -77,6 +77,17 @@ jobs:
           echo "deno.json content after update:"
           cat deno.json
 
+      - name: Commit and Push deno.json Update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add deno.json
+          # Use the new tag for the commit message
+          git commit -m "chore: Bump version to ${{ steps.version.outputs.new_tag }}"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure token is available if needed for push
+
       - name: Run JSR Publish
         run: deno task publish
         # This publish task should ideally use the NEW_TAG version
