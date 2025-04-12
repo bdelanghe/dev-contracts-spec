@@ -1,6 +1,6 @@
 {
   "name": "@devcontracts/spec",
-  "version": "0.1.0",
+  "version": "0.0.5",
   "exports": "./src/mod.ts",
   "license": "MIT",
   "tasks": {
@@ -32,10 +32,15 @@
     "proseWrap": "always"
   },
   "lint": {
-    "include": ["src/"],
+    "include": [
+      "src/"
+    ],
     "exclude": [],
     "rules": {
-      "tags": ["recommended", "jsr"],
+      "tags": [
+        "recommended",
+        "jsr"
+      ],
       "include": [
         "explicit-function-return-type",
         "no-explicit-any",
@@ -76,7 +81,9 @@
   },
   "importMap": "import_map.json",
   "test": {
-    "include": ["src/"],
+    "include": [
+      "src/"
+    ],
     "exclude": []
   },
   "exclude": [
