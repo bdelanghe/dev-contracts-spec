@@ -5,5 +5,13 @@ specification.
 
 ## Organization
 
-_(Questions/Ideas: How should we organize schemas? By artifact type
-(`contracts_toml`, `lockfile`, etc.)? Or by conceptual area?)_
+Schemas are organized by the artifact they represent:
+
+- **`common.ts`**: Contains shared, reusable schema components (like
+  `RefSchema`).
+- **`contracts_toml.ts`**: Defines the schema for the main `contracts.toml`
+  file.
+- **`lockfile.ts`**: Defines the schema for the `contracts.toml.lock` file.
+
+Additional schemas might be added here as needed (e.g., for specific contract
+types if they have complex, distinct structures).
