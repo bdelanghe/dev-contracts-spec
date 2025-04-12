@@ -1,6 +1,6 @@
 {
   "name": "@devcontracts/spec",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "exports": "./src/mod.ts",
   "license": "MIT",
   "tasks": {
