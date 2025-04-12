@@ -1,13 +1,16 @@
 name: Build JSON Schemas
 
 on:
-  push:
+  pull_request:
+    types: [ closed ] # Trigger when a pull request is closed
     branches:
-      - main # Or your default branch
+      - main # Only trigger for PRs targeting the main branch
   workflow_dispatch: # Allows manual triggering
 
 jobs:
   build:
+    # Only run on merged PRs or manual dispatch
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     permissions:
