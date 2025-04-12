@@ -1,0 +1,17 @@
+# Deno cache/lock files
+deno.lock
+
+# Build artifacts (if any)
+dist/
+build/
+
+# Node modules (if npm compatibility is ever used)
+node_modules/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/ 
