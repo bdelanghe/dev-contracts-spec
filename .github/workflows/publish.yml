@@ -18,3 +18,6 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v1
         # No with: deno-version needed, defaults to latest stable
+
+      - name: Run JSR Publish
+        run: deno task publish
