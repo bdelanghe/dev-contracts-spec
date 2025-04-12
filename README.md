@@ -317,5 +317,7 @@ To generate the JSON Schema:
 
 **Generated Schema Files:**
 
-- See the [`contract-schema.json`](./contract-schema.json) file for the main contract configuration schema.
-- See the [`lockfile-schema.json`](./lockfile-schema.json) file for the lockfile schema.
+- See the [`contract-schema.json`](./contract-schema.json) file for the main
+  contract configuration schema.
+- See the [`lockfile-schema.json`](./lockfile-schema.json) file for the lockfile
+  schema.
