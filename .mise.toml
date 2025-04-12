@@ -1,13 +1,2 @@
 [tools]
-deno = "2.2.6"
-
-[tasks]
-test = "deno test"
-lint = "deno lint"
-fmt = "deno fmt"
-check = "deno check src/mod.ts"
-doc-lint = "deno doc --lint src/mod.ts"
-doc-preview = "deno doc --html src/mod.ts"
-doc-test = "deno test --doc"
-publish-dry-run = "deno publish --dry-run"
-check-all = ["mise run test", "mise run lint", "mise run fmt", "mise run check", "mise run doc-lint", "mise run doc-test"] 
+deno = "2.2.9"
