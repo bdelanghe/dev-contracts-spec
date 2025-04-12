@@ -12,7 +12,8 @@
     "doc-preview": "deno doc --html src/mod.ts",
     "doc-test": "deno test --doc",
     "generate-schema": "deno run --allow-read=src/mod.ts --allow-write=./contract-schema.json,./lockfile-schema.json scripts/generate-json-schema.ts",
-    "publish-dry-run": "deno publish --dry-run"
+    "publish-dry-run": "deno publish --dry-run",
+    "publish": "deno publish"
   },
   "fmt": {
     "include": [
