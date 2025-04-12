@@ -9,8 +9,7 @@
     "check": "deno check src/mod.ts",
     "doc-lint": "deno doc --lint src/mod.ts",
     "doc-preview": "deno doc --html --allow-read src/mod.ts",
-    "publish-dry-run": "deno publish --dry-run",
-    "publish": "deno publish"
+    "publish-dry-run": "deno publish --dry-run"
   },
   "fmt": {
     "include": [
