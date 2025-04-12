@@ -1,0 +1,11 @@
+{
+  "scriptId": "322",
+  "url": "file:///Users/bobby/dev/repos/dev-contracts/tools/dev-contracts-spec/src/schemas/common.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 232, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

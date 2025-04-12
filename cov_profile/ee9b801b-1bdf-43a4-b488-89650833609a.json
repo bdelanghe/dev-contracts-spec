@@ -1,0 +1,26 @@
+{
+  "scriptId": "319",
+  "url": "file:///Users/bobby/dev/repos/dev-contracts/tools/dev-contracts-spec/src/schemas/common.test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 504, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 179, "endOffset": 313, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 367, "endOffset": 501, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 417, "endOffset": 449, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

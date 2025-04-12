@@ -1,0 +1,11 @@
+{
+  "scriptId": "354",
+  "url": "file:///Users/bobby/dev/repos/dev-contracts/tools/dev-contracts-spec/src/schemas/lockfile.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 249, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}

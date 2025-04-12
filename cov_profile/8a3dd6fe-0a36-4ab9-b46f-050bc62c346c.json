@@ -1,0 +1,36 @@
+{
+  "scriptId": "319",
+  "url": "file:///Users/bobby/dev/repos/dev-contracts/tools/dev-contracts-spec/src/mod.test.ts",
+  "functions": [
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 0, "endOffset": 2846, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 632, "endOffset": 698, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 1963, "endOffset": 2049, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2112, "endOffset": 2198, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2256, "endOffset": 2332, "count": 1 }],
+      "isBlockCoverage": true
+    },
+    {
+      "functionName": "",
+      "ranges": [{ "startOffset": 2400, "endOffset": 2496, "count": 1 }],
+      "isBlockCoverage": true
+    }
+  ]
+}
