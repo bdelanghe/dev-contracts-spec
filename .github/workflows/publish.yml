@@ -1,23 +1,78 @@
-name: Publish on Release
+name: Test, Release and Publish
 
 on:
-  release:
-    types: [published] # Trigger only when a release is published
+  push:
+    branches: [ main ] # Trigger on push to main
 
 jobs:
-  publish:
+  release-and-publish: # Renamed job for clarity
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Needed to check out the repository
+      contents: write # Needed to checkout, push tags, and create releases
       id-token: write # Needed for JSR OIDC authentication
       packages: write # Needed to publish to GitHub Packages
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to fetch all history for version calculation
 
       - name: Set up Deno
         uses: denoland/setup-deno@v1
         # No with: deno-version needed, defaults to latest stable
 
+      - name: Run Tests
+        run: deno test # Add your actual test command here if different
+
+      - name: Determine Version
+        id: version
+        run: |
+          # Fetch all tags
+          git fetch --tags
+          # Get latest tag like v*.*.*, or set initial version
+          LATEST_TAG=$(git describe --tags --match 'v*.*.*' --abbrev=0 $(git rev-list --tags --max-count=1) 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          # Increment patch version
+          IFS='.' read -r -a V_PARTS <<< "${LATEST_TAG#v}"
+          MAJOR=${V_PARTS[0]}
+          MINOR=${V_PARTS[1]}
+          PATCH=${V_PARTS[2]}
+          NEW_PATCH=$((PATCH + 1))
+          NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+          echo "New tag: $NEW_TAG"
+          # Set outputs for subsequent steps
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create Tag and Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
+          NEW_TAG: ${{ steps.version.outputs.new_tag }}
+        run: |
+          echo "Creating tag ${NEW_TAG}"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+          echo "Creating release for tag ${NEW_TAG}"
+          # Generate release notes automatically based on commits since the last tag
+          gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
+
+      - name: Update deno.json version
+        run: |
+          echo "Updating deno.json to version ${{ steps.version.outputs.new_tag }}"
+          # Use jq to update the version field. Creates the file if it doesn't exist.
+          # Reads the file, updates .version, and writes back to the file.
+          jq --arg ver "${{{ steps.version.outputs.new_tag }}#v}" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
+          echo "deno.json content after update:"
+          cat deno.json
+
       - name: Run JSR Publish
         run: deno task publish
+        # This publish task should ideally use the NEW_TAG version
+        # You might need to update deno.json or the publish script
+        # to read the version from the environment or the new tag.
+        env:
+          PUBLISH_VERSION: ${{ steps.version.outputs.new_tag }}
+
+# Ensure your 'deno task publish' script can use the PUBLISH_VERSION env var
+# or update your deno.json(c) version before this step if necessary.
