@@ -1,8 +1,8 @@
 name: Test, Release and Publish
 
 on:
-  push:
-    branches: [ main ] # Trigger on push to main
+  # push:
+    # branches: [ main ] # Trigger on push to main
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -45,15 +45,38 @@ jobs:
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
-      - name: Create Tag and Release
+      - name: Update Version, Commit, Tag, and Push
+        env:
+          NEW_TAG_VAR: ${{ steps.version.outputs.new_tag }} # Pass the tag to an env var
+        run: |
+          echo "Updating deno.json to version $NEW_TAG_VAR"
+          VERSION_NUMBER="${NEW_TAG_VAR#v}"
+          echo "Version number for jq: $VERSION_NUMBER"
+          jq --arg ver "$VERSION_NUMBER" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
+          echo "deno.json content after update:"
+          cat deno.json
+
+          echo "Configuring git user"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "Adding and committing deno.json"
+          git add deno.json
+          git commit -m "chore: Bump version to $NEW_TAG_VAR"
+
+          echo "Creating and pushing tag ${NEW_TAG_VAR}"
+          git tag $NEW_TAG_VAR
+
+          echo "Pushing commit and tag to main"
+          # Push the commit on main branch and the new tag
+          git push origin main $NEW_TAG_VAR
+
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
           NEW_TAG: ${{ steps.version.outputs.new_tag }}
         run: |
-          echo "Creating tag ${NEW_TAG}"
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
           echo "Creating release for tag ${NEW_TAG}"
           # Generate release notes automatically based on commits since the last tag
           # Handle the case where LATEST_TAG is the default v0.0.0 (first release)
@@ -64,32 +87,6 @@ jobs:
             echo "Generating release notes since tag ${LATEST_TAG}."
             gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
           fi
-
-      - name: Update deno.json version
-        env:
-          NEW_TAG_VAR: ${{ steps.version.outputs.new_tag }} # Pass the tag to an env var
-        run: |
-          echo "Updating deno.json to version $NEW_TAG_VAR"
-          # Use shell parameter expansion to remove the leading 'v' for the jq argument
-          VERSION_NUMBER="${NEW_TAG_VAR#v}"
-          echo "Version number for jq: $VERSION_NUMBER"
-          jq --arg ver "$VERSION_NUMBER" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
-          echo "deno.json content after update:"
-          cat deno.json
-
-      - name: Commit and Push deno.json Update
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add deno.json
-          # Use the new tag for the commit message
-          git commit -m "chore: Bump version to ${{ steps.version.outputs.new_tag }}"
-          # Pull latest changes from main before pushing to avoid non-fast-forward errors
-          git pull origin main --rebase
-          git push origin main
-        # The default GITHUB_TOKEN has permissions to push to the repo
-        # env:
-          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Not strictly necessary
 
       - name: Run JSR Publish
         run: deno task publish
