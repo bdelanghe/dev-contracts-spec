@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Ref, RefSchema } from "./common.ts";
+import { type Ref, RefSchema } from "./common.ts";
 
 /** The definition of a task (command string). */
 export type TaskDefinition = string;

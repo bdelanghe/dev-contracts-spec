@@ -87,47 +87,69 @@ Always aim to leave the project in a working state after each iteration.
 
 ## Debugging
 
-Deno utilizes the V8 Inspector Protocol, allowing debugging with tools like Chrome DevTools, Edge DevTools, and IDEs (VSCode, JetBrains).
+Deno utilizes the V8 Inspector Protocol, allowing debugging with tools like
+Chrome DevTools, Edge DevTools, and IDEs (VSCode, JetBrains).
 
 To enable debugging, use one of the following flags when running a Deno script:
 
--   **`--inspect`**: Starts the Deno process with the debugger server active. The script begins execution immediately. You can connect a debugger client (like Chrome DevTools via `chrome://inspect`) at any time. Best for long-running processes.
-    ```bash
-    deno run --inspect your_script.ts
-    ```
--   **`--inspect-wait`**: Similar to `--inspect`, but Deno waits for the debugger client to connect *before* executing any script code. Useful for debugging startup logic or short scripts where you need to connect before execution finishes.
-    ```bash
-    deno run --inspect-wait your_script.ts
-    ```
--   **`--inspect-brk`**: Waits for the debugger client to connect and then pauses execution on the very first line of code. This is often the most useful flag as it allows you to set breakpoints before any application code runs. IDEs often use this by default.
-    ```bash
-    deno run --inspect-brk your_script.ts
-    ```
+- **`--inspect`**: Starts the Deno process with the debugger server active. The
+  script begins execution immediately. You can connect a debugger client (like
+  Chrome DevTools via `chrome://inspect`) at any time. Best for long-running
+  processes.
+  ```bash
+  deno run --inspect your_script.ts
+  ```
+- **`--inspect-wait`**: Similar to `--inspect`, but Deno waits for the debugger
+  client to connect _before_ executing any script code. Useful for debugging
+  startup logic or short scripts where you need to connect before execution
+  finishes.
+  ```bash
+  deno run --inspect-wait your_script.ts
+  ```
+- **`--inspect-brk`**: Waits for the debugger client to connect and then pauses
+  execution on the very first line of code. This is often the most useful flag
+  as it allows you to set breakpoints before any application code runs. IDEs
+  often use this by default.
+  ```bash
+  deno run --inspect-brk your_script.ts
+  ```
 
 **Connecting with Chrome DevTools:**
 
-1.  Run your script with one of the `--inspect` flags (e.g., `deno run --inspect-brk main.ts`).
-2.  Open Chrome or Edge and navigate to `chrome://inspect`.
-3.  Your Deno process should appear under "Remote Target". Click "inspect".
-4.  The DevTools will open, allowing you to set breakpoints, step through code, inspect variables, etc.
+1. Run your script with one of the `--inspect` flags (e.g.,
+   `deno run --inspect-brk main.ts`).
+2. Open Chrome or Edge and navigate to `chrome://inspect`.
+3. Your Deno process should appear under "Remote Target". Click "inspect".
+4. The DevTools will open, allowing you to set breakpoints, step through code,
+   inspect variables, etc.
 
 **IDE Integration:**
 
--   **VSCode:** Use the official `vscode_deno` extension for seamless debugging integration.
--   **JetBrains IDEs (WebStorm, IntelliJ, etc.):** Use the Deno plugin. You can typically right-click a file and select "Debug 'Deno: <filename>'".
+- **VSCode:** Use the official `vscode_deno` extension for seamless debugging
+  integration.
+- **JetBrains IDEs (WebStorm, IntelliJ, etc.):** Use the Deno plugin. You can
+  typically right-click a file and select "Debug 'Deno: <filename>'".
 
 **Additional Debugging Flags:**
 
--   `--log-level=debug`: Provides verbose logging from Deno itself, useful for diagnosing connection issues or understanding internal behavior.
--   `--strace-ops`: Prints a trace of the internal operations (Ops) between the JavaScript runtime and Deno's Rust core. Useful for performance profiling or debugging hangs.
+- `--log-level=debug`: Provides verbose logging from Deno itself, useful for
+  diagnosing connection issues or understanding internal behavior.
+- `--strace-ops`: Prints a trace of the internal operations (Ops) between the
+  JavaScript runtime and Deno's Rust core. Useful for performance profiling or
+  debugging hangs.
 
 ## Testing
 
-Deno includes a built-in test runner that works seamlessly with TypeScript and JavaScript. Tests ensure code reliability and functionality without requiring external dependencies. See the [Deno Testing Documentation](https://docs.deno.com/runtime/fundamentals/testing/) for full details.
+Deno includes a built-in test runner that works seamlessly with TypeScript and
+JavaScript. Tests ensure code reliability and functionality without requiring
+external dependencies. See the
+[Deno Testing Documentation](https://docs.deno.com/runtime/fundamentals/testing/)
+for full details.
 
 **Writing Tests:**
 
-Tests are defined using the `Deno.test()` function. You can define synchronous, asynchronous, and tests requiring specific permissions.
+Tests are defined using the `Deno.test()` function. You can define synchronous,
+asynchronous, and tests requiring specific permissions.
 
 ```typescript
 // my_module.test.ts
@@ -139,7 +161,7 @@ import { add } from "./my_module.ts"; // Assuming you have a function to test
 Deno.test("add function adds two numbers correctly", () => {
   const result = add(2, 3);
   assertEquals(result, 5); // Using std/assert
-  expect(result).toBe(5);    // Using std/expect
+  expect(result).toBe(5); // Using std/expect
 });
 
 // Async test
@@ -186,14 +208,16 @@ deno coverage ./cov_profile --lcov --output=./cov_profile/lcov.info
 
 **Testing Future Behavior:**
 
-To define tests for features not yet implemented (Test-Driven Development approach):
+To define tests for features not yet implemented (Test-Driven Development
+approach):
 
-1.  Write the test case for the desired future behavior.
-2.  Run `deno test`. The test will fail, confirming the feature is missing.
-3.  Implement the feature.
-4.  Re-run `deno test` until the test passes.
+1. Write the test case for the desired future behavior.
+2. Run `deno test`. The test will fail, confirming the feature is missing.
+3. Implement the feature.
+4. Re-run `deno test` until the test passes.
 
-If implementation is deferred, you can temporarily skip the test using `Deno.test.ignore` to keep the test suite green while documenting the intent:
+If implementation is deferred, you can temporarily skip the test using
+`Deno.test.ignore` to keep the test suite green while documenting the intent:
 
 ```typescript
 Deno.test.ignore("future feature test #123", () => {
@@ -207,20 +231,28 @@ Remember to remove `.ignore` once the feature is implemented.
 
 **Other Features:**
 
--   **Test Steps:** Break down complex tests using `t.step()` within a `Deno.test` function.
--   **Focusing Tests:** Use `Deno.test.only` to run specific tests during development (remember to remove it afterward, as it causes the overall suite to fail).
--   **Sanitizers:** Deno includes built-in checks for resource leaks, unhandled async operations, and unwanted `Deno.exit()` calls (enabled by default).
+- **Test Steps:** Break down complex tests using `t.step()` within a `Deno.test`
+  function.
+- **Focusing Tests:** Use `Deno.test.only` to run specific tests during
+  development (remember to remove it afterward, as it causes the overall suite
+  to fail).
+- **Sanitizers:** Deno includes built-in checks for resource leaks, unhandled
+  async operations, and unwanted `Deno.exit()` calls (enabled by default).
 
 ## Linting and Formatting
 
-This project utilizes Deno's integrated tools to maintain code style consistency and catch potential issues:
+This project utilizes Deno's integrated tools to maintain code style consistency
+and catch potential issues:
 
--   **`deno fmt`**: An opinionated code formatter for TypeScript/JavaScript, Markdown, and JSON. It automatically standardizes code style.
--   **`deno lint`**: A static analysis tool that identifies potential errors, stylistic problems, and anti-patterns based on configurable rules.
+- **`deno fmt`**: An opinionated code formatter for TypeScript/JavaScript,
+  Markdown, and JSON. It automatically standardizes code style.
+- **`deno lint`**: A static analysis tool that identifies potential errors,
+  stylistic problems, and anti-patterns based on configurable rules.
 
 **Usage:**
 
-The primary way to use these tools is through the Deno tasks defined in `deno.jsonc`:
+The primary way to use these tools is through the Deno tasks defined in
+`deno.jsonc`:
 
 ```bash
 # Check if all relevant files are formatted correctly
@@ -233,11 +265,14 @@ deno task fmt
 deno task lint
 ```
 
-Running `deno task fmt` and `deno task lint` regularly helps ensure code quality and consistency throughout the project.
+Running `deno task fmt` and `deno task lint` regularly helps ensure code quality
+and consistency throughout the project.
 
 **Configuration:**
 
-Both tools can be configured via the `deno.jsonc` file. This allows for customization of formatting options (e.g., line width) and lint rules (e.g., enabling/disabling specific checks).
+Both tools can be configured via the `deno.jsonc` file. This allows for
+customization of formatting options (e.g., line width) and lint rules (e.g.,
+enabling/disabling specific checks).
 
 ```jsonc
 // Example snippet from deno.jsonc
@@ -261,4 +296,5 @@ Both tools can be configured via the `deno.jsonc` file. This allows for customiz
 }
 ```
 
-For more details, refer to the official [Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
+For more details, refer to the official
+[Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
