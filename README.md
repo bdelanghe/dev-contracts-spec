@@ -20,3 +20,5 @@ Refer to the main project's `mise` tasks, such as:
 - `mise run contracts-add-untracked`
 - `mise run contracts-prune-structure`
 - `mise run contracts-sort-structure`
+
+# Test change
