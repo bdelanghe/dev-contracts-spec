@@ -33,10 +33,34 @@
     "include": ["src/"],
     "exclude": [],
     "rules": {
-      "tags": ["recommended"],
+      "tags": ["recommended", "jsr"],
       "include": [
         "explicit-function-return-type",
-        "no-explicit-any"
+        "no-explicit-any",
+        "eqeqeq",
+        "explicit-module-boundary-types",
+        "no-non-null-assertion",
+        "no-throw-literal",
+        "prefer-const",
+        "ban-untagged-todo",
+        "camelcase",
+        "default-param-last",
+        "guard-for-in",
+        "no-await-in-loop",
+        "no-boolean-literal-for-arguments",
+        "no-eval",
+        "no-inferrable-types",
+        "no-non-null-asserted-optional-chain",
+        "no-self-compare",
+        "no-sparse-arrays",
+        "no-sync-fn-in-async-fn",
+        "no-useless-rename",
+        "single-var-declarator",
+        "triple-slash-reference",
+        "no-console",
+        "no-debugger",
+        "no-top-level-await",
+        "no-undef"
       ],
       "exclude": []
     }

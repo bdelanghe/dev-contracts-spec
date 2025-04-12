@@ -120,3 +120,145 @@ To enable debugging, use one of the following flags when running a Deno script:
 
 -   `--log-level=debug`: Provides verbose logging from Deno itself, useful for diagnosing connection issues or understanding internal behavior.
 -   `--strace-ops`: Prints a trace of the internal operations (Ops) between the JavaScript runtime and Deno's Rust core. Useful for performance profiling or debugging hangs.
+
+## Testing
+
+Deno includes a built-in test runner that works seamlessly with TypeScript and JavaScript. Tests ensure code reliability and functionality without requiring external dependencies. See the [Deno Testing Documentation](https://docs.deno.com/runtime/fundamentals/testing/) for full details.
+
+**Writing Tests:**
+
+Tests are defined using the `Deno.test()` function. You can define synchronous, asynchronous, and tests requiring specific permissions.
+
+```typescript
+// my_module.test.ts
+import { assertEquals } from "jsr:@std/assert";
+import { expect } from "jsr:@std/expect"; // Optional: for expect-style assertions
+import { add } from "./my_module.ts"; // Assuming you have a function to test
+
+// Basic test
+Deno.test("add function adds two numbers correctly", () => {
+  const result = add(2, 3);
+  assertEquals(result, 5); // Using std/assert
+  expect(result).toBe(5);    // Using std/expect
+});
+
+// Async test
+Deno.test("async operation test", async () => {
+  await someAsyncOperation();
+  // add assertions
+});
+
+// Test requiring permissions (must be granted at runtime)
+Deno.test({
+  name: "read file test",
+  permissions: { read: ["./data.txt"] }, // Specify required permissions
+  fn: () => {
+    const data = Deno.readTextFileSync("./data.txt");
+    assertEquals(data, "expected content");
+  },
+});
+```
+
+**Running Tests:**
+
+Use the `deno test` command:
+
+```bash
+# Run all tests matching {*_,*.,}test.{ts, tsx, mts, js, mjs, jsx} recursively
+deno test
+
+# Run tests in a specific directory
+deno test src/schemas/
+
+# Run a specific test file
+deno test src/schemas/contract.test.ts
+
+# Run tests requiring permissions
+deno test --allow-read=./data.txt
+
+# Filter tests by name (string or /regex/)
+deno test --filter "add function"
+
+# Get code coverage report
+deno test --coverage=./cov_profile
+deno coverage ./cov_profile --lcov --output=./cov_profile/lcov.info
+```
+
+**Testing Future Behavior:**
+
+To define tests for features not yet implemented (Test-Driven Development approach):
+
+1.  Write the test case for the desired future behavior.
+2.  Run `deno test`. The test will fail, confirming the feature is missing.
+3.  Implement the feature.
+4.  Re-run `deno test` until the test passes.
+
+If implementation is deferred, you can temporarily skip the test using `Deno.test.ignore` to keep the test suite green while documenting the intent:
+
+```typescript
+Deno.test.ignore("future feature test #123", () => {
+  // TODO: Implement feature XYZ
+  // Assertions for the expected behavior go here
+  throw new Error("Test not implemented yet");
+});
+```
+
+Remember to remove `.ignore` once the feature is implemented.
+
+**Other Features:**
+
+-   **Test Steps:** Break down complex tests using `t.step()` within a `Deno.test` function.
+-   **Focusing Tests:** Use `Deno.test.only` to run specific tests during development (remember to remove it afterward, as it causes the overall suite to fail).
+-   **Sanitizers:** Deno includes built-in checks for resource leaks, unhandled async operations, and unwanted `Deno.exit()` calls (enabled by default).
+
+## Linting and Formatting
+
+This project utilizes Deno's integrated tools to maintain code style consistency and catch potential issues:
+
+-   **`deno fmt`**: An opinionated code formatter for TypeScript/JavaScript, Markdown, and JSON. It automatically standardizes code style.
+-   **`deno lint`**: A static analysis tool that identifies potential errors, stylistic problems, and anti-patterns based on configurable rules.
+
+**Usage:**
+
+The primary way to use these tools is through the Deno tasks defined in `deno.jsonc`:
+
+```bash
+# Check if all relevant files are formatted correctly
+deno task fmt --check
+
+# Automatically format all relevant files
+deno task fmt
+
+# Run the linter to detect issues
+deno task lint
+```
+
+Running `deno task fmt` and `deno task lint` regularly helps ensure code quality and consistency throughout the project.
+
+**Configuration:**
+
+Both tools can be configured via the `deno.jsonc` file. This allows for customization of formatting options (e.g., line width) and lint rules (e.g., enabling/disabling specific checks).
+
+```jsonc
+// Example snippet from deno.jsonc
+{
+  "fmt": {
+    "options": {
+      "lineWidth": 80,
+      "indentWidth": 2,
+      "singleQuote": false
+    }
+    // Include/exclude specific files if needed
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"] // Example: customize rules
+    }
+    // Include/exclude specific files if needed
+  }
+  // ... other configurations
+}
+```
+
+For more details, refer to the official [Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
