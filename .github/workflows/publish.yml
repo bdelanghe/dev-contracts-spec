@@ -58,11 +58,14 @@ jobs:
           gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
 
       - name: Update deno.json version
+        env:
+          NEW_TAG_VAR: ${{ steps.version.outputs.new_tag }} # Pass the tag to an env var
         run: |
-          echo "Updating deno.json to version ${{ steps.version.outputs.new_tag }}"
-          # Use jq to update the version field. Creates the file if it doesn't exist.
-          # Reads the file, updates .version, and writes back to the file.
-          jq --arg ver "${{{ steps.version.outputs.new_tag }}#v}" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
+          echo "Updating deno.json to version $NEW_TAG_VAR"
+          # Use shell parameter expansion to remove the leading 'v' for the jq argument
+          VERSION_NUMBER="${NEW_TAG_VAR#v}"
+          echo "Version number for jq: $VERSION_NUMBER"
+          jq --arg ver "$VERSION_NUMBER" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
           echo "deno.json content after update:"
           cat deno.json
 
