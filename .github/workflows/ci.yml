@@ -31,4 +31,15 @@ jobs:
       - name: Generate coverage report
         run: |
           mkdir -p coverage # Ensure coverage directory exists
-          deno coverage --lcov cov/ > coverage/cov.lcov 
+          deno coverage --lcov cov/ > coverage/cov.lcov
+
+      - name: Type check
+        run: deno check src/mod.ts
+
+      - name: Lint documentation
+        run: deno doc --lint src/mod.ts
+
+      - name: Test documentation examples
+        # Ensure necessary permissions are granted for your doc tests
+        # Replace --allow-all with specific permissions if possible
+        run: deno test --doc --allow-all 
