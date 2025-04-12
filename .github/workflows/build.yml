@@ -24,7 +24,7 @@ jobs:
           deno-version: v1.x # Use the latest stable Deno version or specify one
 
       - name: Generate JSON Schemas
-        run: deno run --allow-read --allow-write scripts/generate-json-schema.ts
+        run: deno run --allow-read --allow-write --allow-env scripts/generate-json-schema.ts
         env:
           GITHUB_REPO_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}
 
