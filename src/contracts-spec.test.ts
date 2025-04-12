@@ -1,4 +1,4 @@
-import { describe, it, expect } from "@std/assert";
+import { describe, it, expect } from "std/assert/mod.ts";
 import { ContractsSchema } from "./contracts-spec.ts";
 import { z } from "zod";
 
