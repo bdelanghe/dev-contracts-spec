@@ -23,3 +23,10 @@ cov_profile/
 
 # Generated files
 # contract-schema.json -- Removed, we want to commit this
+docs/
+
+# Environment variables
+.env*
+
+# Log files
+*.log
