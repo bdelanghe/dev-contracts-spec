@@ -1,5 +1,5 @@
 {
-  "$id": "https://example.com/devcontracts/spec/contract-schema.json",
+  "$id": "https://raw.githubusercontent.com/bdelanghe/dev-contracts-validate/312bebbfff78ed45ce912d5356cd39564dcb7e93/contract-schema.json",
   "$ref": "#/definitions/ContractSchema",
   "definitions": {
     "ContractSchema": {
