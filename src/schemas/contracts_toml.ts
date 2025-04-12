@@ -26,7 +26,7 @@ export const ContractEntrySchema: z.ZodType<ContractEntry> = z.object({
 }).strict();
 
 /** Represents the parsed content of a `contracts.toml` file. */
-export type ContractsToml = {
+export type Contract = {
   contracts: Record<string, ContractEntry>;
 };
 
@@ -34,7 +34,7 @@ export type ContractsToml = {
  * Main schema for the `contracts.toml` file.
  * Simplified to only include the contracts map.
  */
-export const ContractsTomlSchema: z.ZodType<ContractsToml> = z.object({
+export const ContractSchema: z.ZodType<Contract> = z.object({
   contracts: z.record(ContractEntrySchema)
     .describe("Definitions of individual contracts."),
 }).strict();
