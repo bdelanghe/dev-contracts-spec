@@ -55,7 +55,14 @@ jobs:
           git push origin $NEW_TAG
           echo "Creating release for tag ${NEW_TAG}"
           # Generate release notes automatically based on commits since the last tag
-          gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
+          # Handle the case where LATEST_TAG is the default v0.0.0 (first release)
+          if [ "$LATEST_TAG" == "v0.0.0" ]; then
+            echo "Generating release notes from the beginning of history."
+            gh release create $NEW_TAG --generate-notes
+          else
+            echo "Generating release notes since tag ${LATEST_TAG}."
+            gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
+          fi
 
       - name: Update deno.json version
         env:
