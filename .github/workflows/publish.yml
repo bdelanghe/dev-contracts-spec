@@ -84,9 +84,12 @@ jobs:
           git add deno.json
           # Use the new tag for the commit message
           git commit -m "chore: Bump version to ${{ steps.version.outputs.new_tag }}"
-          git push
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure token is available if needed for push
+          # Pull latest changes from main before pushing to avoid non-fast-forward errors
+          git pull origin main --rebase
+          git push origin main
+        # The default GITHUB_TOKEN has permissions to push to the repo
+        # env:
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Not strictly necessary
 
       - name: Run JSR Publish
         run: deno task publish
