@@ -1,17 +1,17 @@
-name: Test, Release and Publish
+name: Publish
 
 on:
-  # push:
-    # branches: [ main ] # Trigger on push to main
+  push:
+    branches: [ main ] # Trigger on push to main
   workflow_dispatch: # Allow manual triggering
 
 jobs:
   release-and-publish: # Renamed job for clarity
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to checkout, push tags, and create releases
+      contents: write # Needed to checkout, push tags, commit version bump, and create releases
       id-token: write # Needed for JSR OIDC authentication
-      packages: write # Needed to publish to GitHub Packages
+      # packages: write # Removed, likely not needed for JSR
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,13 +88,10 @@ jobs:
             gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
           fi
 
-      - name: Run JSR Publish
-        run: deno task publish
-        # This publish task should ideally use the NEW_TAG version
-        # You might need to update deno.json or the publish script
-        # to read the version from the environment or the new tag.
-        env:
-          PUBLISH_VERSION: ${{ steps.version.outputs.new_tag }}
+      - name: Publish package
+        run: npx jsr publish
+        # npx jsr publish reads the version from deno.json automatically
 
 # Ensure your 'deno task publish' script can use the PUBLISH_VERSION env var
 # or update your deno.json(c) version before this step if necessary.
+# The above comment is no longer relevant as we use npx jsr publish now.
