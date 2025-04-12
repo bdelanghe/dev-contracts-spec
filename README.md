@@ -298,3 +298,24 @@ enabling/disabling specific checks).
 
 For more details, refer to the official
 [Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
+
+## JSON Schema Generation
+
+This project includes the capability to generate a JSON Schema definition
+directly from the primary `ContractSchema` Zod object. This is useful for
+integration with other tools, documentation, or validation outside of
+TypeScript/JavaScript environments.
+
+To generate the JSON Schema:
+
+1. Run the generation script:
+   ```bash
+   deno task generate-schema
+   ```
+2. The script will generate/update the `contract-schema.json` file in the
+   project root.
+
+**Generated Schema Files:**
+
+- See the [`contract-schema.json`](./contract-schema.json) file for the main contract configuration schema.
+- See the [`lockfile-schema.json`](./lockfile-schema.json) file for the lockfile schema.

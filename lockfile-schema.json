@@ -1,0 +1,21 @@
+{
+  "$id": "https://example.com/devcontracts/spec/lockfile-schema.json",
+  "$ref": "#/definitions/LockfileSchema",
+  "definitions": {
+    "LockfileSchema": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1,
+          "description": "Lockfile format version."
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

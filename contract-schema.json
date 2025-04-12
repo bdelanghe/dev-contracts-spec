@@ -1,0 +1,50 @@
+{
+  "$id": "https://example.com/devcontracts/spec/contract-schema.json",
+  "$ref": "#/definitions/ContractSchema",
+  "definitions": {
+    "ContractSchema": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1,
+          "description": "The version of the contracts.toml schema."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Arbitrary key-value metadata for the project."
+        },
+        "contracts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string",
+                "description": "Reference (URL or path) to the contract definition."
+              },
+              "description": {
+                "type": "string",
+                "description": "A brief description of the contract."
+              }
+            },
+            "required": [
+              "ref",
+              "description"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Definitions of individual contracts."
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "metadata",
+        "contracts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

@@ -14,4 +14,12 @@ Thumbs.db
 
 # IDE files
 .vscode/
-.idea/ 
+.idea/
+
+# Runtime cache/artifacts
+.deno_cache/
+.deno_lsp/
+cov_profile/
+
+# Generated files
+# contract-schema.json -- Removed, we want to commit this
