@@ -6,22 +6,25 @@ This project defines and validates the Zod schemas used throughout the
 ## Overview
 
 `dev-contracts-spec` is a core component of the larger `DevContracts` project.
-Its sole responsibility is to provide the canonical Zod type definitions that
-represent the structure and constraints of the `contracts.toml` specification
-and related artifacts used within the DevContracts ecosystem.
+Its primary responsibility _at this stage_ is to provide the canonical Zod type
+definitions that represent the structure and constraints of the `contracts.toml`
+specification, drawing inspiration from well-established configuration schemas
+like ESLint's `.eslintrc`.
 
-Think of this repository as the declarative schema specification for the
-`DevContracts` system. It ensures that the types used by other tools within the
-framework are consistent, correct, and valid according to Zod's rules.
+Think of this repository as the declarative schema specification for the core
+`DevContracts` configuration. It ensures that the types used by other tools
+within the framework are consistent, correct, and valid according to Zod's
+rules. While future iterations may expand the scope, the current focus is solely
+on these foundational Zod types.
 
 ## Purpose
 
-The primary goals of this project are to:
+The primary goals of this project _currently_ are to:
 
-1. **Define:** Provide clear, reusable Zod schemas for all data structures
-   managed or processed by `DevContracts`.
-2. **Validate:** Ensure that these Zod schemas themselves are valid and
-   correctly defined.
+1. **Define:** Provide clear, reusable Zod schemas for the `contracts.toml` data
+   structure and related artifacts.
+2. **Validate:** Ensure that these Zod schemas themselves are valid, correctly
+   defined, and pass Deno's type checking (`deno check`).
 
 This project **does not** contain runtime logic for interacting with specific
 `contracts.toml` files or validating actual project states against a contract.

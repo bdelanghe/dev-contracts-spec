@@ -1,20 +1,14 @@
 import { z } from "zod";
 
+/** Represents the parsed content of a `contracts.toml.lock` file. */
+export type Lockfile = {
+  version: 1;
+};
+
 /**
  * Placeholder schema for the `contracts.toml.lock` file.
- * This will contain the resolved, tokenized state of all contracts
- * at the time the lock file was generated.
- *
- * TODO: Define the actual structure based on how resolution works.
- * It will likely involve mapping original refs (URLs/paths) to
- * canonical, immutable references (e.g., commit hashes for git repos,
- * content hashes for files/URLs).
+ * Simplified to only include the version.
  */
-export const LockfileSchema = z.object({
+export const LockfileSchema: z.ZodType<Lockfile> = z.object({
   version: z.literal(1).describe("Lockfile format version."),
-  // TODO: Define structure for resolved contracts/imports
-  resolved: z.record(z.string(), z.any())
-    .describe("Map of original references to their resolved, immutable state."),
 }).strict();
-
-export type Lockfile = z.infer<typeof LockfileSchema>;

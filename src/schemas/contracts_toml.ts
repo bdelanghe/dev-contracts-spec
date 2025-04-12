@@ -1,54 +1,40 @@
 import { z } from "zod";
-import { RefSchema } from "./common.ts";
+import { Ref, RefSchema } from "./common.ts";
+
+/** The definition of a task (command string). */
+export type TaskDefinition = string;
 
 /**
  * Schema for a single task definition within a contract.
- * Mirrors Deno task structure (simple string or object with cwd).
+ * Simplified to just a command string.
  */
-const TaskDefinitionSchema = z.union([
-  z.string(),
-  z.object({
-    cmd: z.string(),
-    cwd: z.string().optional(),
-    // TODO: Add env vars, etc.?
-  }),
-]);
+export const TaskDefinitionSchema: z.ZodType<TaskDefinition> = z.string();
+
+/** A single contract entry definition. */
+export type ContractEntry = {
+  ref: Ref;
+};
 
 /**
  * Schema for a single contract definition within `contracts.toml`.
+ * Simplified to only include the required ref.
  */
-const ContractEntrySchema = z.object({
-  description: z.string().optional()
-    .describe("Optional description of the contract."),
+export const ContractEntrySchema: z.ZodType<ContractEntry> = z.object({
   ref: RefSchema.describe(
     "Reference (URL or path) to the contract definition.",
   ),
-  tasks: z.record(TaskDefinitionSchema).optional()
-    .describe("Contract-specific Deno tasks."),
-  // TODO: Add dependencies? Runtime args?
-  // dependencies: z.record(RefSchema).optional(),
-}).strict(); // Disallow unknown keys
+}).strict();
+
+/** Represents the parsed content of a `contracts.toml` file. */
+export type ContractsToml = {
+  contracts: Record<string, ContractEntry>;
+};
 
 /**
  * Main schema for the `contracts.toml` file.
+ * Simplified to only include the contracts map.
  */
-export const ContractsTomlSchema = z.object({
-  devcontracts: z.object({
-    version: z.string().regex(/^\d+\.\d+\.\d+$/).optional()
-      .describe("Version of the DevContracts spec this file adheres to."),
-  }).optional().describe("Metadata about the DevContracts usage."),
-
-  imports: z.record(RefSchema).optional()
-    .describe("Mapping of import aliases to contract references (URLs/paths)."),
-
-  tasks: z.record(TaskDefinitionSchema).optional()
-    .describe("Global Deno tasks available to all contracts."),
-
+export const ContractsTomlSchema: z.ZodType<ContractsToml> = z.object({
   contracts: z.record(ContractEntrySchema)
     .describe("Definitions of individual contracts."),
-})
-  .strict(); // Disallow unknown keys at the root
-
-export type ContractsToml = z.infer<typeof ContractsTomlSchema>;
-export type ContractEntry = z.infer<typeof ContractEntrySchema>;
-export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
+}).strict();
