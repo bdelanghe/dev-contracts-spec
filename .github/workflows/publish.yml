@@ -18,20 +18,3 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v1
         # No with: deno-version needed, defaults to latest stable
-
-      - name: Build npm package
-        run: deno run --allow-read --allow-write --allow-env --allow-net scripts/build_npm.ts
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          registry-url: 'https://npm.pkg.github.com/'
-
-      - name: Publish to GitHub Packages
-        working-directory: ./npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
