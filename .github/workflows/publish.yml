@@ -1,17 +1,21 @@
 name: Publish
 
 on:
-  push:
-    branches: [ main ] # Trigger on push to main
+  pull_request:
+    types: [ closed ] # Trigger when a pull request is closed
+    branches: [ main ] # Only trigger for PRs targeting the main branch
   workflow_dispatch: # Allow manual triggering
 
 jobs:
-  release-and-publish: # Renamed job for clarity
+  version-and-tag: # Renamed job
+    # Only run on merged PRs or manual dispatch
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to checkout, push tags, commit version bump, and create releases
-      id-token: write # Needed for JSR OIDC authentication
-      # packages: write # Removed, likely not needed for JSR
+      contents: write # Needed to checkout, push tags, commit version bump
+    outputs: # Add outputs for other jobs
+      new_tag: ${{ steps.version.outputs.new_tag }}
+      latest_tag: ${{ steps.version.outputs.latest_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,7 +26,7 @@ jobs:
         uses: denoland/setup-deno@v1
         # No with: deno-version needed, defaults to latest stable
 
-      - name: Run Tests
+      - name: Run Tests # Moved earlier
         run: deno test # Add your actual test command here if different
 
       - name: Determine Version
@@ -71,14 +75,46 @@ jobs:
           # Push the commit on main branch and the new tag
           git push origin main $NEW_TAG_VAR
 
+# Ensure your 'deno task publish' script can use the PUBLISH_VERSION env var
+# or update your deno.json(c) version before this step if necessary.
+# The above comment is no longer relevant as we use npx jsr publish now.
+
+  publish-package:
+    needs: version-and-tag # Depends on the versioning job
+    # Only run if the first job succeeded and the trigger conditions were met
+    if: always() && needs.version-and-tag.result == 'success' && (github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Need to read repo contents at the tag
+      id-token: write # Needed for JSR OIDC authentication
+    steps:
+      - name: Checkout code at new tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version-and-tag.outputs.new_tag }} # Checkout the specific tag
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+
+      - name: Publish package to JSR
+        run: npx jsr publish
+        # npx jsr publish reads the version from deno.json automatically
+
+  create-github-release:
+    needs: version-and-tag # Depends on the versioning job
+    # Only run if the first job succeeded and the trigger conditions were met
+    if: always() && needs.version-and-tag.result == 'success' && (github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to create releases
+    steps:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
-          NEW_TAG: ${{ steps.version.outputs.new_tag }}
+          LATEST_TAG: ${{ needs.version-and-tag.outputs.latest_tag }}
+          NEW_TAG: ${{ needs.version-and-tag.outputs.new_tag }}
         run: |
           echo "Creating release for tag ${NEW_TAG}"
-          # Generate release notes automatically based on commits since the last tag
           # Handle the case where LATEST_TAG is the default v0.0.0 (first release)
           if [ "$LATEST_TAG" == "v0.0.0" ]; then
             echo "Generating release notes from the beginning of history."
@@ -87,11 +123,3 @@ jobs:
             echo "Generating release notes since tag ${LATEST_TAG}."
             gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
           fi
-
-      - name: Publish package
-        run: npx jsr publish
-        # npx jsr publish reads the version from deno.json automatically
-
-# Ensure your 'deno task publish' script can use the PUBLISH_VERSION env var
-# or update your deno.json(c) version before this step if necessary.
-# The above comment is no longer relevant as we use npx jsr publish now.
