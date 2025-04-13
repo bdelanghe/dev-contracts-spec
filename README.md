@@ -18,24 +18,25 @@ The key idea is **tokenization**: high-level goals defined in the contract are
 resolved into specific configuration "tokens." These tokens are stored in a
 lockfile and can be used by other tools (potentially via plugins) to:
 
-1.  **Validate:** Ensure configuration files (`deno.json`, `package.json`, etc.)
-    across the project adhere to the standards defined in the contract.
-2.  **Generate:** Potentially scaffold or update configuration files based on
-    the contract's tokens.
+1. **Validate:** Ensure configuration files (`deno.json`, `package.json`, etc.)
+   across the project adhere to the standards defined in the contract.
+2. **Generate:** Potentially scaffold or update configuration files based on the
+   contract's tokens.
 
 This approach promotes self-consistency within a project, similar to how design
-tokens ensure UI consistency. See the [Tokenization Strategy](#tokenization-strategy-experimental)
-section for more details.
+tokens ensure UI consistency. See the
+[Tokenization Strategy](#tokenization-strategy-experimental) section for more
+details.
 
 ## Purpose
 
 The primary goals of this specification project are currently to:
 
-1.  **Define Schemas:** Provide clear, reusable Zod schemas for the
-    `contracts.toml` data structure, the resulting lockfile, and related
-    artifacts needed to represent project properties and configuration tokens.
-2.  **Validate Schemas:** Ensure that these Zod schemas themselves are valid,
-    correctly defined, and pass Deno's type checking (`deno check`).
+1. **Define Schemas:** Provide clear, reusable Zod schemas for the
+   `contracts.toml` data structure, the resulting lockfile, and related
+   artifacts needed to represent project properties and configuration tokens.
+2. **Validate Schemas:** Ensure that these Zod schemas themselves are valid,
+   correctly defined, and pass Deno's type checking (`deno check`).
 
 This project focuses strictly on the **type definitions** and their validation.
 It **does not** contain runtime logic for parsing specific `contracts.toml`
@@ -421,9 +422,10 @@ discrete, verifiable configuration units, or "tokens."
    schemas).
 2. **Resolution & Locking:** When a contract is processed (e.g., by a validation
    or generation tool), these high-level specifications are resolved into
-   concrete configuration tokens and stored in a lockfile (`dev-contracts.lock` -
-   name TBD) alongside the fully resolved contract structure. This represents the
-   "trickle-down" effect from abstract goals to specific settings.
+   concrete configuration tokens and stored in a lockfile
+   (`dev-contracts.lock` - name TBD) alongside the fully resolved contract
+   structure. This represents the "trickle-down" effect from abstract goals to
+   specific settings.
 3. **Verification:** A separate validation tool (part of the `DevContracts`
    ecosystem, potentially extended via plugins) can then:
    - Parse target artifacts (like `deno.json`, `.eslintrc.json`, etc.) into
@@ -454,7 +456,7 @@ suggest features, or submit a pull request with improvements.
 
 When contributing, please ensure:
 
--   Code adheres to the project's formatting (`deno task fmt`) and linting
-    (`deno task lint`) standards.
--   Relevant tests are added or updated (`deno task test`).
--   Changes are documented appropriately.
+- Code adheres to the project's formatting (`deno task fmt`) and linting
+  (`deno task lint`) standards.
+- Relevant tests are added or updated (`deno task test`).
+- Changes are documented appropriately.

@@ -15,7 +15,10 @@ describe("Resolved Token Schemas (for Lockfile)", () => {
       assertEquals(TokenPrimitiveSchema.parse("hello"), "hello");
       assertEquals(TokenPrimitiveSchema.parse(123), 123);
       const expectedBoolean = true;
-      assertEquals(TokenPrimitiveSchema.parse(expectedBoolean), expectedBoolean);
+      assertEquals(
+        TokenPrimitiveSchema.parse(expectedBoolean),
+        expectedBoolean,
+      );
       assertEquals(TokenPrimitiveSchema.parse(null), null);
     });
 
