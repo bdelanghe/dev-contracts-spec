@@ -1,15 +1,12 @@
-import {
-  assertEquals,
-  assertThrows,
-} from "jsr:@std/assert";
+import { assertEquals, assertThrows } from "jsr:@std/assert";
 import { describe, it } from "jsr:@std/testing/bdd"; // Using BDD style for consistency if preferred
 import { ZodError } from "npm:zod";
 import {
-  TokenPrimitiveSchema,
-  ResolvedTokenSchema,
-  ResolvedTokenCollectionSchema,
   type ResolvedToken, // Import type for test data
   type ResolvedTokenCollection, // Import type for test data
+  ResolvedTokenCollectionSchema,
+  ResolvedTokenSchema,
+  TokenPrimitiveSchema,
 } from "./token.ts";
 
 describe("Resolved Token Schemas (for Lockfile)", () => {
@@ -17,7 +14,9 @@ describe("Resolved Token Schemas (for Lockfile)", () => {
     it("should validate correct primitive types", () => {
       assertEquals(TokenPrimitiveSchema.parse("hello"), "hello");
       assertEquals(TokenPrimitiveSchema.parse(123), 123);
-      assertEquals(TokenPrimitiveSchema.parse(true), true);
+      const expectedBoolean = true;
+      // deno-lint-ignore no-boolean-literal-for-arguments
+      assertEquals(TokenPrimitiveSchema.parse(true), expectedBoolean);
       assertEquals(TokenPrimitiveSchema.parse(null), null);
     });
 
@@ -80,7 +79,8 @@ describe("Resolved Token Schemas (for Lockfile)", () => {
 
     it("should throw on extra properties", () => {
       assertThrows(
-        () => ResolvedTokenSchema.parse({ path: "a.b", value: "v", extra: "f" }),
+        () =>
+          ResolvedTokenSchema.parse({ path: "a.b", value: "v", extra: "f" }),
         ZodError,
         "Unrecognized key(s) in object: 'extra'",
       );
@@ -125,4 +125,4 @@ describe("Resolved Token Schemas (for Lockfile)", () => {
       );
     });
   });
-}); 
+});
