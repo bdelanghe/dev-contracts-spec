@@ -43,7 +43,7 @@ processing contract-related data.
 ```
 .
 ├── .gitignore
-├── deno.jsonc                 # Deno configuration (tasks, lint, fmt, check)
+├── deno.json                 # Deno configuration (tasks, lint, fmt, check)
 ├── import_map.json            # Dependency management
 ├── README.md                  # This file
 ├── src/
@@ -54,7 +54,7 @@ processing contract-related data.
 └── ... (test files will live alongside source files)
 ```
 
-- **`deno.jsonc`**: Defines standard Deno tasks (`fmt`, `lint`, `test`,
+- **`deno.json`**: Defines standard Deno tasks (`fmt`, `lint`, `test`,
   `check`), compiler options, and points to the `import_map.json`.
 - **`import_map.json`**: Manages external dependencies (like Zod).
 - **`src/schemas/`**: Contains all Zod schema definitions. See the `README.md`
@@ -252,7 +252,7 @@ and catch potential issues:
 **Usage:**
 
 The primary way to use these tools is through the Deno tasks defined in
-`deno.jsonc`:
+`deno.json`:
 
 ```bash
 # Check if all relevant files are formatted correctly
@@ -270,12 +270,12 @@ and consistency throughout the project.
 
 **Configuration:**
 
-Both tools can be configured via the `deno.jsonc` file. This allows for
+Both tools can be configured via the `deno.json` file. This allows for
 customization of formatting options (e.g., line width) and lint rules (e.g.,
 enabling/disabling specific checks).
 
 ```jsonc
-// Example snippet from deno.jsonc
+// Example snippet from deno.json
 {
   "fmt": {
     "options": {
@@ -298,6 +298,36 @@ enabling/disabling specific checks).
 
 For more details, refer to the official
 [Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
+
+## Automated Publishing
+
+This project uses a GitHub Actions workflow (`.github/workflows/publish.yml`) to automate the publishing process to JSR (JavaScript Registry) and create GitHub Releases.
+
+**Workflow Trigger:**
+
+The workflow runs automatically when:
+
+1.  A pull request targeting the `main` branch is closed and merged.
+2.  It is manually triggered via the GitHub Actions interface (`workflow_dispatch`).
+
+**Process:**
+
+1.  **Checkout & Test:** The code is checked out, Deno is set up, and tests (`deno test`) are run.
+2.  **Versioning:**
+    *   The latest Git tag matching the pattern `v*.*.*` (e.g., `v0.1.2`) is fetched. If no tag exists, it defaults to `v0.0.0`.
+    *   The patch version number is incremented (e.g., `v0.1.2` becomes `v0.1.3`).
+    *   The `version` field in `deno.json` is updated with the new version number.
+    *   The changes to `deno.json` are committed.
+    *   A new Git tag with the incremented version is created (e.g., `v0.1.3`).
+    *   The commit and the new tag are pushed to the `main` branch.
+3.  **Publish to JSR:**
+    *   The code is checked out at the newly created tag.
+    *   The package is published to JSR using `npx jsr publish`. JSR automatically reads the version from the `deno.json` file at that tag. Authentication is handled via OIDC.
+4.  **Create GitHub Release:**
+    *   A new GitHub Release is created corresponding to the new tag.
+    *   Release notes are automatically generated based on the commits since the previous tag (or from the beginning for the first release).
+
+This ensures that every merge to `main` results in a tested, versioned, and published release.
 
 ## JSON Schema Generation
 
