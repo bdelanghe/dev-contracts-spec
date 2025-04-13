@@ -1,5 +1,8 @@
 # DevContracts Spec
 
+[![JSR](https://jsr.io/badges/@dev-contracts/spec)](https://jsr.io/@dev-contracts/spec)
+[![Publish Workflow Status](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml/badge.svg)](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml)
+
 This project defines and validates the Zod schemas used throughout the
 `DevContracts` framework.
 
@@ -322,7 +325,7 @@ The workflow runs automatically when:
     *   The commit and the new tag are pushed to the `main` branch.
 3.  **Publish to JSR:**
     *   The code is checked out at the newly created tag.
-    *   The package is published to JSR using `npx jsr publish`. JSR automatically reads the version from the `deno.json` file at that tag. Authentication is handled via OIDC.
+    *   The package is published to JSR ([`@dev-contracts/spec`](https://jsr.io/@dev-contracts/spec)) using `npx jsr publish`. JSR automatically reads the version from the `deno.json` file at that tag. Authentication is handled via OIDC.
 4.  **Create GitHub Release:**
     *   A new GitHub Release is created corresponding to the new tag.
     *   Release notes are automatically generated based on the commits since the previous tag (or from the beginning for the first release).
