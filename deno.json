@@ -1,5 +1,5 @@
 {
-  "name": "@devcontracts/spec",
+  "name": "@dev-contracts/spec",
   "version": "0.0.11",
   "exports": "./src/mod.ts",
   "license": "MIT",
