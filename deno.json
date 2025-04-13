@@ -4,6 +4,13 @@
   "version": "0.0.13",
   "exports": "./src/mod.ts",
   "license": "MIT",
+  "exclude": [
+    ".github/",
+    "scripts/",
+    ".mise.toml",
+    "examples/",
+    "*.test.ts"
+  ],
   "tasks": {
     "test": "deno test",
     "lint": "deno lint",
@@ -86,8 +93,5 @@
       "src/"
     ],
     "exclude": []
-  },
-  "exclude": [
-    "docs/"
-  ]
+  }
 }
