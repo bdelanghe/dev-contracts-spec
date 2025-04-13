@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type Ref, RefSchema } from "./common.ts";
+import { type TokenPrimitive, TokenPrimitiveSchema } from "./token.ts";
 
 /** The definition of a task (command string). */
 export type TaskDefinition = string;
@@ -32,11 +33,19 @@ export type Contract = {
   schemaVersion: 1;
   metadata: Record<string, unknown>;
   contracts: Record<string, ContractEntry>;
+  /** Optional section for defining named primitive tokens. Values must be primitives. */
+  tokens?: Record<string, TokenPrimitive>;
 };
+
+// Define schema for the contract's token definitions
+const ContractTokensSchema = z.record(TokenPrimitiveSchema)
+  .describe(
+    "Definitions for named primitive tokens (string, number, boolean, null).",
+  );
 
 /**
  * Main schema for the `contracts.toml` file.
- * Includes schema version, metadata, and the contracts map.
+ * Includes schema version, metadata, contracts, and tokens.
  */
 export const ContractSchema: z.ZodType<Contract> = z.object({
   schemaVersion: z.literal(1).describe(
@@ -47,4 +56,6 @@ export const ContractSchema: z.ZodType<Contract> = z.object({
   ),
   contracts: z.record(ContractEntrySchema)
     .describe("Definitions of individual contracts."),
+  /** Optional definitions for named primitive tokens */
+  tokens: ContractTokensSchema.optional(),
 }).strict();

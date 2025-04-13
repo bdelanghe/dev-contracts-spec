@@ -57,8 +57,8 @@ processing contract-related data.
 └── ... (test files will live alongside source files)
 ```
 
-- **`deno.json`**: Defines standard Deno tasks (`fmt`, `lint`, `test`,
-  `check`), compiler options, and points to the `import_map.json`.
+- **`deno.json`**: Defines standard Deno tasks (`fmt`, `lint`, `test`, `check`),
+  compiler options, and points to the `import_map.json`.
 - **`import_map.json`**: Manages external dependencies (like Zod).
 - **`src/schemas/`**: Contains all Zod schema definitions. See the `README.md`
   within this directory for organization details.
@@ -304,33 +304,43 @@ For more details, refer to the official
 
 ## Automated Publishing
 
-This project uses a GitHub Actions workflow (`.github/workflows/publish.yml`) to automate the publishing process to JSR (JavaScript Registry) and create GitHub Releases.
+This project uses a GitHub Actions workflow (`.github/workflows/publish.yml`) to
+automate the publishing process to JSR (JavaScript Registry) and create GitHub
+Releases.
 
 **Workflow Trigger:**
 
 The workflow runs automatically when:
 
-1.  A pull request targeting the `main` branch is closed and merged.
-2.  It is manually triggered via the GitHub Actions interface (`workflow_dispatch`).
+1. A pull request targeting the `main` branch is closed and merged.
+2. It is manually triggered via the GitHub Actions interface
+   (`workflow_dispatch`).
 
 **Process:**
 
-1.  **Checkout & Test:** The code is checked out, Deno is set up, and tests (`deno test`) are run.
-2.  **Versioning:**
-    *   The latest Git tag matching the pattern `v*.*.*` (e.g., `v0.1.2`) is fetched. If no tag exists, it defaults to `v0.0.0`.
-    *   The patch version number is incremented (e.g., `v0.1.2` becomes `v0.1.3`).
-    *   The `version` field in `deno.json` is updated with the new version number.
-    *   The changes to `deno.json` are committed.
-    *   A new Git tag with the incremented version is created (e.g., `v0.1.3`).
-    *   The commit and the new tag are pushed to the `main` branch.
-3.  **Publish to JSR:**
-    *   The code is checked out at the newly created tag.
-    *   The package is published to JSR ([`@dev-contracts/spec`](https://jsr.io/@dev-contracts/spec)) using `npx jsr publish`. JSR automatically reads the version from the `deno.json` file at that tag. Authentication is handled via OIDC.
-4.  **Create GitHub Release:**
-    *   A new GitHub Release is created corresponding to the new tag.
-    *   Release notes are automatically generated based on the commits since the previous tag (or from the beginning for the first release).
+1. **Checkout & Test:** The code is checked out, Deno is set up, and tests
+   (`deno test`) are run.
+2. **Versioning:**
+   - The latest Git tag matching the pattern `v*.*.*` (e.g., `v0.1.2`) is
+     fetched. If no tag exists, it defaults to `v0.0.0`.
+   - The patch version number is incremented (e.g., `v0.1.2` becomes `v0.1.3`).
+   - The `version` field in `deno.json` is updated with the new version number.
+   - The changes to `deno.json` are committed.
+   - A new Git tag with the incremented version is created (e.g., `v0.1.3`).
+   - The commit and the new tag are pushed to the `main` branch.
+3. **Publish to JSR:**
+   - The code is checked out at the newly created tag.
+   - The package is published to JSR
+     ([`@dev-contracts/spec`](https://jsr.io/@dev-contracts/spec)) using
+     `npx jsr publish`. JSR automatically reads the version from the `deno.json`
+     file at that tag. Authentication is handled via OIDC.
+4. **Create GitHub Release:**
+   - A new GitHub Release is created corresponding to the new tag.
+   - Release notes are automatically generated based on the commits since the
+     previous tag (or from the beginning for the first release).
 
-This ensures that every merge to `main` results in a tested, versioned, and published release.
+This ensures that every merge to `main` results in a tested, versioned, and
+published release.
 
 ## JSON Schema Generation
 
@@ -354,3 +364,51 @@ To generate the JSON Schema:
   contract configuration schema.
 - See the [`lockfile-schema.json`](./lockfile-schema.json) file for the lockfile
   schema.
+
+## Tokenization Strategy (Experimental)
+
+Inspired by the
+[Design Tokens Community Group (DTCG)](https://github.com/design-tokens/community-group),
+we are exploring a "tokenization" strategy for `DevContracts`. The core idea is
+to allow parts of the `contracts.toml` specification to be broken down into
+discrete, referencable units, or "tokens."
+
+**Motivation:**
+
+- **Validation:** Tokens provide a granular way to verify that specific values
+  within project artifacts (e.g., the `"license": "MIT"` field in `deno.json` or
+  `package.json`) match the intent specified in the contract.
+- **Generation:** In the future, these tokens could potentially be used by
+  tooling to generate or update configuration files based on the contract.
+- **Consistency:** Ensures that configuration values defined in the contract are
+  consistently applied across different parts of a project or related projects.
+
+**How it Works (Conceptual):**
+
+1. **Definition:** Within the `contracts.toml` (or associated schemas), specific
+   configuration points can be designated as tokens.
+2. **Resolution & Locking:** When a contract is processed (e.g., by a validation
+   or generation tool), these tokens are resolved into concrete values and
+   stored in a lockfile (`dev-contracts.lock` - name TBD) alongside the fully
+   resolved contract structure.
+3. **Verification:** A separate validation tool (part of the `DevContracts`
+   ecosystem) can then:
+   - Parse target artifacts (like `deno.json`, `.eslintrc.json`, etc.) into
+     their own token representations.
+   - Compare the tokens derived from the artifact against the expected tokens
+     stored in the lockfile.
+
+**Comparison to Nix:**
+
+While not a direct equivalent, the underlying principle shares similarities with
+systems like [Nix](https://nixos.org/). Nix uses a declarative, functional
+language to define package builds and system configurations, resulting in highly
+reproducible environments. `DevContracts` aims for declarative _project
+configuration_ consistency. Where Nix focuses on the entire build process and
+dependency graph to ensure reproducibility of _binaries and environments_,
+DevContracts tokens focus on declaring and verifying specific _configuration
+values_ within project artifacts.
+
+This tokenization feature is currently experimental and under development within
+the `dev-contracts-spec` itself, primarily focusing on how to represent these
+tokens within the Zod schemas and the resulting lockfile format.

@@ -11,7 +11,7 @@ const CONTRACT_SCHEMA_FILE = "contract-schema.json";
 const CONTRACT_SCHEMA_ID = GITHUB_REPO_URL ? `${GITHUB_REPO_URL}/${CONTRACT_SCHEMA_FILE}` : "http://localhost:8000/contract-schema.json"; // Fallback for local dev
 
 // Generate the schema using the definition name
-const contractBaseSchema = zodToJsonSchema(ContractSchema, "ContractSchema");
+const contractBaseSchema = zodToJsonSchema(ContractSchema, "DevContractSchema");
 
 // Manually add the $id to the root of the schema object
 const contractFinalSchema = {
@@ -35,7 +35,7 @@ const LOCKFILE_SCHEMA_FILE = "lockfile-schema.json";
 const LOCKFILE_SCHEMA_ID = GITHUB_REPO_URL ? `${GITHUB_REPO_URL}/${LOCKFILE_SCHEMA_FILE}` : "http://localhost:8000/lockfile-schema.json"; // Fallback for local dev
 
 // Generate the schema using the definition name
-const lockfileBaseSchema = zodToJsonSchema(LockfileSchema, "LockfileSchema");
+const lockfileBaseSchema = zodToJsonSchema(LockfileSchema, "DevContractLockfileSchema");
 
 // Manually add the $id to the root of the schema object
 const lockfileFinalSchema = {
