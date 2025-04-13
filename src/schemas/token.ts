@@ -46,7 +46,8 @@ export const ResolvedTokenSchema: z.ZodType<ResolvedToken> = z.object({
     "The resolved primitive value of the token.",
   ),
   // TBD: Add metadata? Source location in contract? Type information?
-}).describe("A single resolved configuration token.");
+}).strict()
+  .describe("A single resolved configuration token.");
 
 /**
  * Zod schema for a collection of resolved tokens, likely stored in the lockfile.
