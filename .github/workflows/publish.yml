@@ -108,6 +108,11 @@ jobs:
     permissions:
       contents: write # Needed to create releases
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for release notes generation
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
