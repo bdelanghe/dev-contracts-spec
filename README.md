@@ -3,43 +3,74 @@
 [![JSR](https://jsr.io/badges/@dev-contracts/spec)](https://jsr.io/@dev-contracts/spec)
 [![Publish Workflow Status](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml/badge.svg)](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml)
 
-This project defines and validates the Zod schemas used throughout the
-`DevContracts` framework.
+This project defines the canonical Zod schemas for the `DevContracts` framework,
+enabling the declarative specification of project configurations and ensuring
+consistency across project artifacts.
 
-## Overview
+## Core Concept
 
-`dev-contracts-spec` is a core component of the larger `DevContracts` project.
-Its primary responsibility _at this stage_ is to provide the canonical Zod type
-definitions that represent the structure and constraints of the `contracts.toml`
-specification, drawing inspiration from well-established configuration schemas
-like ESLint's `.eslintrc`.
+`DevContracts` allows developers to define high-level project standards and
+properties (like code quality, testing requirements, or deployment settings) in
+a central `contracts.toml` file. This specification (`dev-contracts-spec`)
+provides the Zod schemas to validate that contract file.
 
-Think of this repository as the declarative schema specification for the core
-`DevContracts` configuration. It ensures that the types used by other tools
-within the framework are consistent, correct, and valid according to Zod's
-rules. While future iterations may expand the scope, the current focus is solely
-on these foundational Zod types.
+The key idea is **tokenization**: high-level goals defined in the contract are
+resolved into specific configuration "tokens." These tokens are stored in a
+lockfile and can be used by other tools (potentially via plugins) to:
+
+1.  **Validate:** Ensure configuration files (`deno.json`, `package.json`, etc.)
+    across the project adhere to the standards defined in the contract.
+2.  **Generate:** Potentially scaffold or update configuration files based on
+    the contract's tokens.
+
+This approach promotes self-consistency within a project, similar to how design
+tokens ensure UI consistency. See the [Tokenization Strategy](#tokenization-strategy-experimental)
+section for more details.
 
 ## Purpose
 
-The primary goals of this project _currently_ are to:
+The primary goals of this specification project are currently to:
 
-1. **Define:** Provide clear, reusable Zod schemas for the `contracts.toml` data
-   structure and related artifacts.
-2. **Validate:** Ensure that these Zod schemas themselves are valid, correctly
-   defined, and pass Deno's type checking (`deno check`).
+1.  **Define Schemas:** Provide clear, reusable Zod schemas for the
+    `contracts.toml` data structure, the resulting lockfile, and related
+    artifacts needed to represent project properties and configuration tokens.
+2.  **Validate Schemas:** Ensure that these Zod schemas themselves are valid,
+    correctly defined, and pass Deno's type checking (`deno check`).
 
-This project **does not** contain runtime logic for interacting with specific
-`contracts.toml` files or validating actual project states against a contract.
-That functionality resides in other tools within the `DevContracts` ecosystem.
-This project focuses strictly on the **type definitions** themselves.
+This project focuses strictly on the **type definitions** and their validation.
+It **does not** contain runtime logic for parsing specific `contracts.toml`
+files or validating actual project states against a contract. That functionality
+resides in other tools within the `DevContracts` ecosystem that _consume_ these
+schemas.
 
-## Usage
+## Usage (Consuming the Schemas)
 
 The Zod schemas defined here are intended to be imported and utilized by other
-tools within the `DevContracts` framework (e.g., validation scripts, code
-generators, schema bridge tools) to ensure type safety and consistency when
-processing contract-related data.
+tools within the `DevContracts` framework (e.g., validation CLI, code
+generators, IDE plugins).
+
+```typescript
+// Example: Importing the main contract schema in another Deno project
+import { ContractSchema } from "jsr:@dev-contracts/spec";
+import { type z } from "npm:zod"; // Assuming Zod is available
+
+// Now you can use ContractSchema to parse or validate data
+// (Actual validation logic would be more complex)
+function validateContract(data: unknown): z.infer<typeof ContractSchema> {
+  const result = ContractSchema.safeParse(data);
+  if (!result.success) {
+    // Handle validation errors
+    console.error("Invalid contract:", result.error.errors);
+    throw new Error("Contract validation failed");
+  }
+  return result.data;
+}
+
+// Example usage (assuming you loaded contract data from a file)
+// const contractData = JSON.parse(Deno.readTextFileSync("contracts.toml")); // Needs TOML parser
+// const validatedContract = validateContract(contractData);
+// console.log("Contract is valid:", validatedContract);
+```
 
 ## Project Structure
 
@@ -369,9 +400,9 @@ To generate the JSON Schema:
 
 Inspired by the
 [Design Tokens Community Group (DTCG)](https://github.com/design-tokens/community-group),
-we are exploring a "tokenization" strategy for `DevContracts`. The core idea is
-to allow parts of the `contracts.toml` specification to be broken down into
-discrete, referencable units, or "tokens."
+`DevContracts` uses a "tokenization" strategy. The core idea is to translate
+high-level project properties defined in the `contracts.toml` specification into
+discrete, verifiable configuration units, or "tokens."
 
 **Motivation:**
 
@@ -385,14 +416,16 @@ discrete, referencable units, or "tokens."
 
 **How it Works (Conceptual):**
 
-1. **Definition:** Within the `contracts.toml` (or associated schemas), specific
-   configuration points can be designated as tokens.
+1. **Definition:** High-level project goals (like code quality standards or
+   deployment targets) are specified within `contracts.toml` (or associated
+   schemas).
 2. **Resolution & Locking:** When a contract is processed (e.g., by a validation
-   or generation tool), these tokens are resolved into concrete values and
-   stored in a lockfile (`dev-contracts.lock` - name TBD) alongside the fully
-   resolved contract structure.
+   or generation tool), these high-level specifications are resolved into
+   concrete configuration tokens and stored in a lockfile (`dev-contracts.lock` -
+   name TBD) alongside the fully resolved contract structure. This represents the
+   "trickle-down" effect from abstract goals to specific settings.
 3. **Verification:** A separate validation tool (part of the `DevContracts`
-   ecosystem) can then:
+   ecosystem, potentially extended via plugins) can then:
    - Parse target artifacts (like `deno.json`, `.eslintrc.json`, etc.) into
      their own token representations.
    - Compare the tokens derived from the artifact against the expected tokens
@@ -407,8 +440,21 @@ reproducible environments. `DevContracts` aims for declarative _project
 configuration_ consistency. Where Nix focuses on the entire build process and
 dependency graph to ensure reproducibility of _binaries and environments_,
 DevContracts tokens focus on declaring and verifying specific _configuration
-values_ within project artifacts.
+values_ within project artifacts, ensuring they align with the high-level goals.
+Plugins can then leverage these tokens for various build and integration tasks.
 
 This tokenization feature is currently experimental and under development within
 the `dev-contracts-spec` itself, primarily focusing on how to represent these
 tokens within the Zod schemas and the resulting lockfile format.
+
+## Contributing
+
+Contributions are welcome! Please feel free to open an issue to discuss bugs or
+suggest features, or submit a pull request with improvements.
+
+When contributing, please ensure:
+
+-   Code adheres to the project's formatting (`deno task fmt`) and linting
+    (`deno task lint`) standards.
+-   Relevant tests are added or updated (`deno task test`).
+-   Changes are documented appropriately.
