@@ -1,15 +1,17 @@
-// import { Deno } from "deno"; // Removed unused import
 import {
   // assert, // Removed unused import
   assertEquals,
+  // assertFalse, // Removed unused import
+  // assertRejects, // Removed unused import
   assertThrows,
 } from "jsr:@std/assert";
-import { z } from "zod";
+// import { describe, it } from "jsr:@std/testing/bdd"; // Removed unused import
+import { ZodError } from "npm:zod";
 import {
   type Contract,
   ContractEntrySchema,
   ContractSchema,
-} from "./contracts_toml.ts";
+} from "./dev_contract.ts";
 
 Deno.test("ContractSchema: Validates a minimal correct structure", () => {
   const validData: Contract = {
@@ -45,7 +47,7 @@ Deno.test("ContractSchema: Throws on invalid structure (missing ref)", () => {
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Required", // Expecting ZodError with message indicating 'ref' is required
   );
 });
@@ -64,7 +66,7 @@ Deno.test("ContractSchema: Throws on invalid structure (missing description)", (
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Required",
   );
 });
@@ -83,7 +85,7 @@ Deno.test("ContractSchema: Throws on invalid structure (missing schemaVersion)",
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Invalid literal value, expected 1",
   );
 });
@@ -102,7 +104,7 @@ Deno.test("ContractSchema: Throws on invalid structure (missing metadata)", () =
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Required",
   );
 });
@@ -122,7 +124,7 @@ Deno.test("ContractSchema: Throws on invalid structure (extra entry property due
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Unrecognized key(s) in object: 'extraField'", // Expecting ZodError about unrecognized keys
   );
 });
@@ -142,7 +144,7 @@ Deno.test("ContractSchema: Throws on invalid structure (extra top-level property
 
   assertThrows(
     () => ContractSchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Unrecognized key(s) in object: 'otherStuff'",
   );
 });
@@ -160,7 +162,7 @@ Deno.test("ContractEntrySchema: Throws on missing ref", () => {
   const invalidData = { description: "Missing ref" };
   assertThrows(
     () => ContractEntrySchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Required",
   );
 });
@@ -169,7 +171,7 @@ Deno.test("ContractEntrySchema: Throws on missing description", () => {
   const invalidData = { ref: "./some-ref.json" }; // description is missing
   assertThrows(
     () => ContractEntrySchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Required",
   );
 });
@@ -178,7 +180,7 @@ Deno.test("ContractEntrySchema: Throws on non-string ref", () => {
   const invalidData = { ref: 123, description: "Non-string ref" };
   assertThrows(
     () => ContractEntrySchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Expected string, received number",
   );
 });
@@ -187,7 +189,7 @@ Deno.test("ContractEntrySchema: Throws on non-string description", () => {
   const invalidData = { ref: "./some-ref.json", description: 999 }; // description is not a string
   assertThrows(
     () => ContractEntrySchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Expected string, received number",
   );
 });
@@ -200,7 +202,7 @@ Deno.test("ContractEntrySchema: Throws on extra property due to strict", () => {
   };
   assertThrows(
     () => ContractEntrySchema.parse(invalidData),
-    z.ZodError,
+    ZodError,
     "Unrecognized key(s) in object: 'extra'",
   );
 });

@@ -2,20 +2,30 @@ import { z } from "zod";
 
 // --- Type Definitions ---
 
-/**
- * Represents the structure of a single resolved token.
- */
+/** Allowed primitive types for token values. */
+export type TokenPrimitive = string | number | boolean | null;
+
+/** Represents the structure of a single resolved token. */
 export type ResolvedToken = {
   path: string;
-  value: unknown;
+  value?: TokenPrimitive; // Use primitive type, keep optional to match schema inference
 };
 
-/**
- * Represents the structure of a collection of resolved tokens (key-value pairs).
- */
-export type ResolvedTokenCollection = Record<string, unknown>;
+/** Represents the structure of a collection of resolved tokens. */
+export type ResolvedTokenCollection = Record<
+  string,
+  TokenPrimitive | undefined
+>;
 
 // --- Zod Schemas ---
+
+/** Zod schema for allowed primitive token values. */
+export const TokenPrimitiveSchema: z.ZodType<TokenPrimitive> = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
 
 /**
  * Zod schema for a single, resolved configuration token.
@@ -30,10 +40,11 @@ export const ResolvedTokenSchema: z.ZodType<ResolvedToken> = z.object({
   path: z.string().describe(
     "Unique identifier/path for the token (e.g., using JSONPath syntax).",
   ),
-  /**
-   * The resolved value of the token.
-   */
-  value: z.unknown().describe("The resolved value of the token."),
+  // Value is optional in the schema to satisfy the type checker compatibility with the type alias.
+  // The type alias ResolvedToken makes it optional 'value?: TokenPrimitive'
+  value: TokenPrimitiveSchema.optional().describe(
+    "The resolved primitive value of the token.",
+  ),
   // TBD: Add metadata? Source location in contract? Type information?
 }).describe("A single resolved configuration token.");
 
@@ -43,9 +54,8 @@ export const ResolvedTokenSchema: z.ZodType<ResolvedToken> = z.object({
 export const ResolvedTokenCollectionSchema: z.ZodType<ResolvedTokenCollection> =
   z
     .record(
-      // The key could be the token path for easy lookup
       z.string().describe("Token path/identifier"),
-      z.unknown(), // Store only the resolved value, path is the key
+      TokenPrimitiveSchema.optional(), // Allow optional/undefined values in the record
     ).describe("A collection of resolved tokens, keyed by their path.");
 
 // Note: We still need to define how tokens are *declared* within the
