@@ -1,0 +1,43 @@
+name: Publish Package and Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Trigger on version tags like v1.2.3
+
+permissions:
+  contents: write # Needed to create GitHub releases
+  id-token: write # Needed for OIDC authentication with JSR
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code at tag
+        uses: actions/checkout@v4
+        with:
+          # Check out the specific tag that triggered the workflow
+          ref: ${{ github.ref }}
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        # Use the version from deno.json at the tagged commit
+        # with:
+        #   deno-version: vx.x.x
+
+      - name: Run Tests
+        run: deno test
+
+      - name: Publish to JSR
+        run: npx jsr publish
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Extract version from tag (e.g., v1.2.3 -> 1.2.3)
+          VERSION="${{ github.ref_name }}"
+          echo "Creating release for tag $VERSION"
+          gh release create "$VERSION" \
+             --generate-notes \
+             --title "Release $VERSION"
