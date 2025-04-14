@@ -21,9 +21,9 @@ jobs:
 
       - name: Set up Deno
         uses: denoland/setup-deno@v1
-        # Use the version from deno.json at the tagged commit
-        # with:
-        #   deno-version: vx.x.x
+        # No need to specify deno-version here, v1.x is the default
+        # and it's best to use the version the project was tagged with,
+        # which setup-deno handles implicitly when checking out the tag.
 
       - name: Run Tests
         run: deno test
