@@ -94,8 +94,19 @@ jobs:
           git push origin $BRANCH_NAME
 
           echo "Creating Pull Request"
-          # Use single line for gh pr create command
-          gh pr create --base main --head $BRANCH_NAME --title "chore: Prepare release $NEW_TAG_VAR" --body "Automated PR to bump version to $NEW_TAG_VAR and update deno.json. Please review and merge to trigger release."
+          # Use single line for gh pr create command, capture output
+          PR_URL=$(gh pr create --base main --head $BRANCH_NAME --title "chore: Prepare release $NEW_TAG_VAR" --body "Automated PR to bump version to $NEW_TAG_VAR and update deno.json. Please review and merge to trigger release.")
+          echo "Created PR: $PR_URL"
+
+          # Check if PR creation was successful
+          if [ -z "$PR_URL" ]; then
+            echo "Error: Failed to create pull request. Exiting."
+            exit 1
+          fi
+
+          echo "Enabling auto-merge for PR $PR_URL"
+          gh pr merge --auto --merge "$PR_URL"
+          echo "Auto-merge enabled for $PR_URL"
 
 # Removed publish-package and create-github-release jobs from this workflow
 # They will be moved to a separate workflow triggered by tag pushes.
