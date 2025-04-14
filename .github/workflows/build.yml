@@ -36,6 +36,6 @@ jobs:
         with:
           commit_message: "chore: update generated JSON schemas"
           file_pattern: "*.json" # Commit only JSON files in the root
-          commit_user_name: github-actions[bot]
-          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          commit_author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com> 
+          # Explicitly set branch to main for merged PRs, rely on default for dispatch
+          branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true && 'main' || '' }}
+          # Removed explicit user/email/author - action defaults to github-actions bot

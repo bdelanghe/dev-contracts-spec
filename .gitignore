@@ -24,6 +24,8 @@ cov_profile/
 # Generated files
 # contract-schema.json -- Removed, we want to commit this
 docs/
+contract-schema.json
+lockfile-schema.json
 
 # Environment variables
 .env*
