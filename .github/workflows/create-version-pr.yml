@@ -83,6 +83,12 @@ jobs:
 
           # Removed tag creation
 
+          # Check if branch exists remotely and delete it if it does
+          if git ls-remote --exit-code --heads origin "$BRANCH_NAME"; then
+            echo "Branch $BRANCH_NAME already exists on remote. Deleting it."
+            git push origin --delete "$BRANCH_NAME"
+          fi
+
           echo "Pushing branch $BRANCH_NAME"
           # Push only the new branch
           git push origin $BRANCH_NAME
