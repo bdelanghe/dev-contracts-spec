@@ -29,17 +29,36 @@ jobs:
       - name: Determine Version
         id: version
         run: |
-          git fetch --tags
-          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+$' | head -n1 || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
-          IFS='.' read -r -a V_PARTS <<< "${LATEST_TAG#v}"
-          MAJOR=${V_PARTS[0]}
-          MINOR=${V_PARTS[1]}
-          PATCH=${V_PARTS[2]}
+          git fetch --tags --force # Ensure we have latest tags
+          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | head -n1)
+
+          # Check if a tag was found, otherwise default
+          if [[ -z "$LATEST_TAG" ]]; then
+            echo "No valid vX.Y.Z tag found, defaulting to v0.0.0"
+            LATEST_TAG="v0.0.0"
+          else
+            echo "Latest tag found: $LATEST_TAG"
+          fi
+
+          # Strip 'v' prefix
+          VERSION_STRING="${LATEST_TAG#v}"
+
+          # Split into parts using cut
+          MAJOR=$(echo "$VERSION_STRING" | cut -d. -f1)
+          MINOR=$(echo "$VERSION_STRING" | cut -d. -f2)
+          PATCH=$(echo "$VERSION_STRING" | cut -d. -f3)
+
+          # Validate parts are numbers (basic check)
+          if ! [[ "$MAJOR" =~ ^[0-9]+$ && "$MINOR" =~ ^[0-9]+$ && "$PATCH" =~ ^[0-9]+$ ]]; then
+            echo "Error: Parsed version parts are not valid numbers: MAJOR='$MAJOR', MINOR='$MINOR', PATCH='$PATCH'"
+            exit 1
+          fi
+
+          # Calculate new patch version
           NEW_PATCH=$((PATCH + 1))
           NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
-          echo "New tag: $NEW_TAG"
-          # Set output for use in this job
+
+          echo "Determined new tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
       - name: Update Version, Create Branch, Commit, Push, and Create PR
