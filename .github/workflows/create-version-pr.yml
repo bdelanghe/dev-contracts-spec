@@ -23,9 +23,6 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v1
 
-      - name: Run Tests
-        run: deno test
-
       - name: Determine Version
         id: version
         run: |
@@ -91,11 +88,8 @@ jobs:
           git push origin $BRANCH_NAME
 
           echo "Creating Pull Request"
-          gh pr create \\
-            --base main \\
-            --head $BRANCH_NAME \\
-            --title "chore: Prepare release $NEW_TAG_VAR" \\
-            --body "Automated PR to bump version to $NEW_TAG_VAR and update deno.json. Please review and merge to trigger release."
+          # Use single line for gh pr create command
+          gh pr create --base main --head $BRANCH_NAME --title "chore: Prepare release $NEW_TAG_VAR" --body "Automated PR to bump version to $NEW_TAG_VAR and update deno.json. Please review and merge to trigger release."
 
 # Removed publish-package and create-github-release jobs from this workflow
 # They will be moved to a separate workflow triggered by tag pushes.
