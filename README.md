@@ -1,7 +1,7 @@
 # DevContracts Spec
 
 [![JSR](https://jsr.io/badges/@dev-contracts/spec)](https://jsr.io/@dev-contracts/spec)
-[![Publish Workflow Status](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml/badge.svg)](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/publish.yml)
+[![CI Workflow Status](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/bdelanghe/dev-contracts-spec/actions/workflows/ci.yml)
 
 This project defines the canonical Zod schemas for the `DevContracts` framework,
 enabling the declarative specification of project configurations and ensuring
@@ -334,45 +334,58 @@ enabling/disabling specific checks).
 For more details, refer to the official
 [Deno Linting and Formatting Documentation](https://docs.deno.com/runtime/fundamentals/linting_and_formatting/).
 
-## Automated Publishing
+## Release Workflow
 
-This project uses a GitHub Actions workflow (`.github/workflows/publish.yml`) to
-automate the publishing process to JSR (JavaScript Registry) and create GitHub
-Releases.
+This project uses a two-step, semi-automated release process managed by GitHub
+Actions:
 
-**Workflow Trigger:**
+1. **Version Bump PR Creation (`create-version-pr.yml`)**: Triggered
+   automatically when a pull request is merged into the `main` branch.
+   - Determines the next patch version based on the latest Git tag (e.g.,
+     `v0.1.2` -> `v0.1.3`).
+   - Updates the `version` field in `deno.json`.
+   - Creates a new branch (e.g., `chore/version-v0.1.3`).
+   - Commits the changes and pushes the branch.
+   - Opens a pull request titled "chore: Prepare release vX.Y.Z" for review.
+2. **Publishing (`publish.yml`)**: Triggered manually by pushing a Git tag
+   matching `v*.*.*` (e.g., `git tag v0.1.3 && git push origin v0.1.3`).
+   - This tag should only be pushed after the corresponding version bump PR has
+     been merged.
+   - Checks out the code at the specified tag.
+   - Runs tests (`deno test`).
+   - Publishes the package to JSR
+     ([`@dev-contracts/spec`](https://jsr.io/@dev-contracts/spec)) using the
+     version from `deno.json` at that tag.
+   - Creates a GitHub Release corresponding to the tag, automatically generating
+     release notes.
 
-The workflow runs automatically when:
+This separation ensures that a version is only published after explicit tagging,
+providing a manual review gate before release.
 
-1. A pull request targeting the `main` branch is closed and merged.
-2. It is manually triggered via the GitHub Actions interface
-   (`workflow_dispatch`).
+**Workflow Diagram:**
 
-**Process:**
+```mermaid
+graph TD
+    A[PR Merged to main] --> B(Run create-version-pr.yml);
+    B --> C{Determine vX.Y.Z+1};
+    C --> D[Update deno.json];
+    D --> E[Create Branch chore/version-vX.Y.Z];
+    E --> F[Create PR];
+    F --> G{Review & Merge Version PR};
+    G --> H[Manually Tag & Push vX.Y.Z];
+    H --> I(Run publish.yml);
+    I --> J[Run Tests];
+    J --> K[Publish to JSR];
+    K --> L[Create GitHub Release];
 
-1. **Checkout & Test:** The code is checked out, Deno is set up, and tests
-   (`deno test`) are run.
-2. **Versioning:**
-   - The latest Git tag matching the pattern `v*.*.*` (e.g., `v0.1.2`) is
-     fetched. If no tag exists, it defaults to `v0.0.0`.
-   - The patch version number is incremented (e.g., `v0.1.2` becomes `v0.1.3`).
-   - The `version` field in `deno.json` is updated with the new version number.
-   - The changes to `deno.json` are committed.
-   - A new Git tag with the incremented version is created (e.g., `v0.1.3`).
-   - The commit and the new tag are pushed to the `main` branch.
-3. **Publish to JSR:**
-   - The code is checked out at the newly created tag.
-   - The package is published to JSR
-     ([`@dev-contracts/spec`](https://jsr.io/@dev-contracts/spec)) using
-     `npx jsr publish`. JSR automatically reads the version from the `deno.json`
-     file at that tag. Authentication is handled via OIDC.
-4. **Create GitHub Release:**
-   - A new GitHub Release is created corresponding to the new tag.
-   - Release notes are automatically generated based on the commits since the
-     previous tag (or from the beginning for the first release).
+    subgraph "Version Bump Workflow"
+        B; C; D; E; F;
+    end
 
-This ensures that every merge to `main` results in a tested, versioned, and
-published release.
+    subgraph "Publish Workflow"
+        I; J; K; L;
+    end
+```
 
 ## JSON Schema Generation
 
