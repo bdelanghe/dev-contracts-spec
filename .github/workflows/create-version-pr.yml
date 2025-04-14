@@ -1,43 +1,37 @@
-name: Publish
+name: Create Version PR # Renamed workflow
 
 on:
   pull_request:
-    types: [ closed ] # Trigger when a pull request is closed
-    branches: [ main ] # Only trigger for PRs targeting the main branch
-  workflow_dispatch: # Allow manual triggering
+    types: [ closed ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  version-and-tag: # Renamed job
-    # Only run on merged PRs or manual dispatch
+  create-version-branch-and-pr: # Renamed job
     if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to checkout, push tags, commit version bump
-    outputs: # Add outputs for other jobs
-      new_tag: ${{ steps.version.outputs.new_tag }}
-      latest_tag: ${{ steps.version.outputs.latest_tag }}
+      contents: write # Needed to checkout, commit, push branch
+      pull-requests: write # Needed to create a pull request
+    # Removed outputs as tag is not created here
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Required to fetch all history for version calculation
+          fetch-depth: 0
 
       - name: Set up Deno
         uses: denoland/setup-deno@v1
-        # No with: deno-version needed, defaults to latest stable
 
-      - name: Run Tests # Moved earlier
-        run: deno test # Add your actual test command here if different
+      - name: Run Tests
+        run: deno test
 
       - name: Determine Version
         id: version
         run: |
-          # Fetch all tags
           git fetch --tags
-          # Get latest tag like v*.*.* using version sort, or set initial version
-          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v[0-9]\+\.[0-9]\+\.[0-9]\+$' | head -n1 || echo "v0.0.0")
+          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+$' | head -n1 || echo "v0.0.0")
           echo "Latest tag: $LATEST_TAG"
-          # Increment patch version
           IFS='.' read -r -a V_PARTS <<< "${LATEST_TAG#v}"
           MAJOR=${V_PARTS[0]}
           MINOR=${V_PARTS[1]}
@@ -45,17 +39,16 @@ jobs:
           NEW_PATCH=$((PATCH + 1))
           NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
           echo "New tag: $NEW_TAG"
-          # Set outputs for subsequent steps
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          # Set output for use in this job
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
-      - name: Update Version, Commit, Tag, and Push
+      - name: Update Version, Create Branch, Commit, Push, and Create PR
         env:
-          NEW_TAG_VAR: ${{ steps.version.outputs.new_tag }} # Pass the tag to an env var
+          NEW_TAG_VAR: ${{ steps.version.outputs.new_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use default token for PR creation
         run: |
           echo "Updating deno.json to version $NEW_TAG_VAR"
           VERSION_NUMBER="${NEW_TAG_VAR#v}"
-          echo "Version number for jq: $VERSION_NUMBER"
           jq --arg ver "$VERSION_NUMBER" '.version = $ver' deno.json > tmp.$$.json && mv tmp.$$.json deno.json
           echo "deno.json content after update:"
           cat deno.json
@@ -64,67 +57,28 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          BRANCH_NAME="chore/version-${NEW_TAG_VAR}"
+          echo "Creating and checking out new branch: $BRANCH_NAME"
+          git checkout -b $BRANCH_NAME
+
           echo "Adding and committing deno.json"
           git add deno.json
           git commit -m "chore: Bump version to $NEW_TAG_VAR"
 
-          echo "Creating and pushing tag ${NEW_TAG_VAR}"
-          git tag $NEW_TAG_VAR
+          # Removed tag creation
 
-          echo "Pushing commit and tag to main"
-          # Push the commit on main branch and the new tag
-          git push origin main $NEW_TAG_VAR
+          echo "Pushing branch $BRANCH_NAME"
+          # Push only the new branch
+          git push origin $BRANCH_NAME
 
-# Ensure your 'deno task publish' script can use the PUBLISH_VERSION env var
-# or update your deno.json(c) version before this step if necessary.
-# The above comment is no longer relevant as we use npx jsr publish now.
+          echo "Creating Pull Request"
+          gh pr create \\
+            --base main \\
+            --head $BRANCH_NAME \\
+            --title "chore: Prepare release $NEW_TAG_VAR" \\
+            --body "Automated PR to bump version to $NEW_TAG_VAR and update deno.json. Please review and merge to trigger release."
 
-  publish-package:
-    needs: version-and-tag # Depends on the versioning job
-    # Only run if the first job succeeded and the trigger conditions were met
-    if: always() && needs.version-and-tag.result == 'success' && (github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read # Need to read repo contents at the tag
-      id-token: write # Needed for JSR OIDC authentication
-    steps:
-      - name: Checkout code at new tag
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.version-and-tag.outputs.new_tag }} # Checkout the specific tag
-
-      - name: Set up Deno
-        uses: denoland/setup-deno@v1
-
-      - name: Publish package to JSR
-        run: npx jsr publish
-        # npx jsr publish reads the version from deno.json automatically
-
-  create-github-release:
-    needs: version-and-tag # Depends on the versioning job
-    # Only run if the first job succeeded and the trigger conditions were met
-    if: always() && needs.version-and-tag.result == 'success' && (github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # Needed to create releases
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Required for release notes generation
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LATEST_TAG: ${{ needs.version-and-tag.outputs.latest_tag }}
-          NEW_TAG: ${{ needs.version-and-tag.outputs.new_tag }}
-        run: |
-          echo "Creating release for tag ${NEW_TAG}"
-          # Handle the case where LATEST_TAG is the default v0.0.0 (first release)
-          if [ "$LATEST_TAG" == "v0.0.0" ]; then
-            echo "Generating release notes from the beginning of history."
-            gh release create $NEW_TAG --generate-notes
-          else
-            echo "Generating release notes since tag ${LATEST_TAG}."
-            gh release create $NEW_TAG --generate-notes --notes-start-tag $LATEST_TAG
-          fi
+# Removed publish-package and create-github-release jobs from this workflow
+# They will be moved to a separate workflow triggered by tag pushes.
+# ... existing code ...
+# Ensure lines 78-131 are removed
