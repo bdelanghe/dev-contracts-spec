@@ -1,7 +1,7 @@
 {
   "name": "@dev-contracts/spec",
   "description": "Core Zod schemas for the DevContracts framework, defining the structure and constraints for contract specifications.",
-  "version": "0.0.21",
+  "version": "0.0.26",
   "exports": "./src/mod.ts",
   "license": "MIT",
   "exclude": [
